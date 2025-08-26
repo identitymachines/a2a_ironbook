@@ -1,9 +1,15 @@
-# A2A x Iron Book — Least-Privilege LLM Handoff (Extension Demo)
+# A2A x Iron Book — Least-Privilege Action Handoff (Extension Demo)
+
+> Iron Book SDK target: `ironbook-sdk >= 0.3.1`.  
+> Docs (Iron Book SDK): https://pypi.org/project/ironbook-sdk — Quick Start, methods, calls, data types.  
+> Iron Book comprehensive solution overview: https://docs.identitymachines.com.  
+> Docs (Extension): Iron Book A2A Extension page https://pypi.org/project/ironbook-a2a-extension.  
+> This demo is governance-focused; no real LLM call is made (document for the Summarizer agent action is simulated).
 
 This repository demonstrates a **profile/data A2A extension** (`x-ironbook`) that adds **zero-trust, policy-gated handoffs** between agents:
 
 - **Triage** agent (requester) has **no LLM inference capability**; it has the capability to **`delegate`** only.
-- **Summarizer** agent (executor) has **`openai_infer`** capability and performs the LLM action *only if* policy allows.
+- **Summarizer** agent (executor) has **`openai_infer`** capability and performs the LLM inference action *only if* policy allows.
 
 Both must **ALLOW** to proceed.
 
@@ -35,8 +41,3 @@ Both must **ALLOW** to proceed.
 - **API key issues**: Get your Iron Book API key at https://ironbook.identitymachines.com
 - **Agent Not Found**: Your agent's DID is be stripped of all non-alphanumeric characters (if you name your Iron Book agent "a2a-summarizer", your DID will be 'did:web:agents.identitymachines.com:a2asummarizer')
 - **Port conflicts**: Change `SUMMARIZER_PORT` in `.env`
-
-> SDK target: `ironbook-sdk >= 0.3.1`. Refer to the package's Quick Start and methods (register agent, get auth token, upload policy, policy decision).  
-> Docs (SDK): Iron Book Python SDK page (https://pypi.org/project/ironbook-sdk) — methods, calls, data types.
-> Docs (Extension): Iron Book A2A Extension page (https://pypi.org/project/ironbook-a2a-extension).
-> This demo is governance-focused; no real LLM call is made (document for the Summarizer agent action is simulated).
