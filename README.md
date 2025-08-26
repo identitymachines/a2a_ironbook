@@ -32,7 +32,8 @@ Both must **ALLOW** to proceed.
 
 ### Troubleshooting
 - **Module errors**: Use `python -m agents.summarizer` instead of `python agents/summarizer.py`
-- **API key issues**: Verify your key at https://ironbook.identitymachines.com
+- **API key issues**: Get your Iron Book API key at https://ironbook.identitymachines.com
+- **Agent Not Found**: Your agent's DID is be stripped of all non-alphanumeric characters (if you name your Iron Book agent "a2a-summarizer", your DID will be 'did:web:agents.identitymachines.com:a2asummarizer')
 - **Port conflicts**: Change `SUMMARIZER_PORT` in `.env`
 
 > SDK target: `ironbook-sdk >= 0.3.1`. Refer to the package's Quick Start and methods (register agent, get auth token, upload policy, policy decision).  
