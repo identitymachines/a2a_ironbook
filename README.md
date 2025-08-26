@@ -22,5 +22,6 @@ Both must **ALLOW** to proceed.
 - Executor must have **`openai_infer`**, allowed **model/region/data_classification**, **no PII**, and **budget** within limits.
 
 > SDK target: `ironbook-sdk >= 0.3.0`. Refer to the package's Quick Start and methods (register agent, get auth token, upload policy, policy decision).  
-> Docs: Iron Book PyPI page (https://pypi.org/project/ironbook-sdk) — methods & data types.
-> This demo is governance-focused; no real LLM call is made (document for the Summarizer agent action is simulated). :contentReference[oaicite:1]{index=1}
+> Docs (SDK): Iron Book Python SDK page (https://pypi.org/project/ironbook-sdk) — methods, calls, data types.
+> Docs (Extension): Iron Book A2A Extension page (https://pypi.org/project/ironbook-a2a-extension).
+> This demo is governance-focused; no real LLM call is made (document for the Summarizer agent action is simulated).
