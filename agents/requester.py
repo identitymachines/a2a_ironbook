@@ -22,10 +22,11 @@ from ironbook_a2a import (
 load_dotenv()
 
 # Go to https://ironbook.identitymachines.com to create a free account; provision your API Key in Your Organization Name (Top right) => Settings
+# The Iron Book Portal also allows you to view agents, their audit logs, create policies, and more.
 IRONBOOK_API_KEY = os.getenv("IRONBOOK_API_KEY", "REPLACE_ME")
 IRONBOOK_AUDIENCE = os.getenv("IRONBOOK_AUDIENCE", "https://api.identitymachines.com")
 
-TRIAGE_AGENT_NAME = os.getenv("TRIAGE_AGENT_NAME", "a2a-triage")
+TRIAGE_AGENT_NAME = os.getenv("TRIAGE_AGENT_NAME", "a2atriage")
 TRIAGE_CAPABILITIES = ["delegate"]  # Does not have the 'openai_infer' capability
 
 SUMMARIZER_URL = os.getenv("SUMMARIZER_URL", "http://localhost:8001/agents/summarizer")
@@ -64,8 +65,8 @@ async def main():
         triage = await client.get_agent(f"did:web:agents.identitymachines.com:{TRIAGE_AGENT_NAME}")
 
     token_data = await client.get_auth_token(GetAuthTokenOptions(
-        agent_did=triage["agentDid"],
-        vc=triage["vc"],
+        agent_did=triage.did,
+        vc=triage.vc,
         audience=IRONBOOK_AUDIENCE
     ))
     access_token = token_data.get("access_token")
@@ -77,7 +78,7 @@ async def main():
         "method": "task/execute",
         "params": {
             "message": { "task": "summarize", "inputRef": "doc://case-123" }, # This is the input to the summarizer agent; NOT an actual document to summarize
-            "metadata": build_metadata(triage["agentDid"], access_token)
+            "metadata": build_metadata(triage.did, access_token)
         }
     }
     headers = { "Content-Type": "application/json", "X-A2A-Extensions": IRONBOOK_EXTENSION_URI } # This is the header that tells the summarizer agent that the requester agent is using the Iron Book extension

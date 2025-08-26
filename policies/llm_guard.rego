@@ -2,6 +2,8 @@ package policies.llm_guard
 
 default allow := false
 
+# Use https://play.openpolicyagent.org to validate syntax, or create all kinds of crazy, much more granular policies
+
 # Scope: LLM inference
 in_scope if {
   input.action == "infer"

@@ -28,10 +28,11 @@ from ironbook_a2a import (
 load_dotenv()
 
 # Go to https://ironbook.identitymachines.com to create a free account; provision your API Key in Your Organization Name (Top right) => Settings
+# The Iron Book Portal also allows you to view agents, their audit logs, create policies, and more.
 IRONBOOK_API_KEY = os.getenv("IRONBOOK_API_KEY", "REPLACE_ME")
 IRONBOOK_AUDIENCE = os.getenv("IRONBOOK_AUDIENCE", "https://api.identitymachines.com")
 
-SUMM_AGENT_NAME = os.getenv("SUMM_AGENT_NAME", "a2a-summarizer")
+SUMM_AGENT_NAME = os.getenv("SUMM_AGENT_NAME", "a2asummarizer")
 SUMM_CAPABILITIES = ["openai_infer"]  # Has the 'openai_infer' capability
 
 SUMMARIZER_HOST = os.getenv("SUMMARIZER_HOST", "0.0.0.0")
@@ -72,6 +73,7 @@ async def bootstrap() -> None:
     with open(POLICY_PATH, "r", encoding="utf-8") as f:
         policy_content = f.read()
 
+    # Reuploading the policy is OK, as this will simply override the previous version
     policy = await client.upload_policy(UploadPolicyOptions(
         config_type="opa",
         policy_content=policy_content,
@@ -126,7 +128,7 @@ async def summarizer_entry(req: Request):
     triage_did = md.get(IRONBOOK_AGENT_DID_FIELD)
 
     if not all([action, resource, context, triage_token, triage_did]):
-        raise HTTPException(status_code=400, detail="Missing required extension metadata")
+        raise HTTPException(status_code=400, detail="Missing required Iron Book A2A extension metadata")
 
     client: IronBookClient = BOOT["client"]
     policy_id = BOOT["policy"]["policyId"]
@@ -143,15 +145,15 @@ async def summarizer_entry(req: Request):
         resource=resource,
         context=ctx_requester
     ))
-    if not triage_decision.get("allow", False):
+    if not triage_decision.allow:
         return _a2a_error(a2a.id, "Extension activation failed",
-                          {"reason": triage_decision.get("reason", "Requester not allowed")})
+                          {"reason": triage_decision.reason | "Requester not allowed to perform this action"})
 
     # 5) Decision #2 — Executor (Summarizer agent) allowed to execute? (role=executor)
     summ = BOOT["summ_agent"]
     token_data = await client.get_auth_token(GetAuthTokenOptions(
-        agent_did=summ["agentDid"],
-        vc=summ["vc"],
+        agent_did=summ.did,
+        vc=summ.vc,
         audience=IRONBOOK_AUDIENCE
     ))
     access_token = token_data.get("access_token")
@@ -163,21 +165,21 @@ async def summarizer_entry(req: Request):
     ctx_executor["requester_agent_did"] = triage_did # Audit log will record full context, including the Triage agent's DID for reference
 
     summ_decision = await client.policy_decision(PolicyInput(
-        agent_did=summ["agentDid"],
+        agent_did=summ.did,
         policy_id=policy_id,
         token=access_token,
         action=action,
         resource=resource,
         context=ctx_executor
     ))
-    if not summ_decision.get("allow", False):
+    if not summ_decision.allow:
         return _a2a_error(a2a.id, "Denied by policy",
-                          {"reason": summ_decision.get("reason", "Executor not allowed")})
+                          {"reason": summ_decision.reason | "Executor not allowed to perform this action"})
 
     # 6) Demo result (no real LLM call)
     task = a2a.params.message.get("task", "summarize")
     input_ref = a2a.params.message.get("inputRef", "doc://unknown") # This is the sample input to the summarizer agent; NOT an actual document to summarize
-    result = f"[Demo] {task} OK for {input_ref} using model={context.get('model')}"
+    result = f"[Demo] {task} task succeeded OK for {input_ref}, ran by {summ.name} using model={context.get('model')}"
 
     res_obj = _a2a_result(a2a.id, {"result": result})
     return Response(

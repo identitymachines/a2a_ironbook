@@ -7,7 +7,7 @@ run-summarizer:
 	UVICORN_RELOAD=1 python -m agents.summarizer
 
 run-requester:
-	python agents/requester.py
+	python 0m agents.requester
 
 lint:
 	python -m compileall .
