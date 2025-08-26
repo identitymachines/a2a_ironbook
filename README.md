@@ -1,4 +1,4 @@
-# A2A x Iron Book — Least-Privilege Action Handoff (Extension Demo)
+# A2A x Iron Book — Least-Privilege Agent Task Handoff (Extension Demo)
 
 > Iron Book SDK target: `ironbook-sdk >= 0.3.1`.  
 > Docs (Iron Book SDK): https://pypi.org/project/ironbook-sdk — Quick Start, methods, calls, data types.  
