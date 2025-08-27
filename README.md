@@ -8,10 +8,8 @@
 
 This repository demonstrates a **profile/data A2A extension** (`x-ironbook`) that adds **zero-trust, policy-gated handoffs** between agents:
 
-- **Least-privilege delegation:** a **Triage** agent (requester) can only **delegate**; a **Summarizer** (executor) agent is the only one allowed to **infer**. Capabilities are enforced by policy, not hope. 
-GitHub.
-- **Two-decision guardrail:** we separately verify that the requester is **allowed to ask** and the executor is **allowed to act**, solving the classic confused-deputy problem. 
-GitHub.
+- **Least-privilege delegation:** a **Triage** agent (requester) can only **delegate**; a **Summarizer** (executor) agent is the only one allowed to **infer**. Capabilities are enforced by policy, not hope.
+- **Two-decision guardrail:** we separately verify that the requester is **allowed to ask** and the executor is **allowed to act**, solving the classic confused-deputy problem.
 - **Enterprise guardrails in Rego:** model allow-list, region & data-class, PII=no, budget caps, etc.; all evaluated server-side with an injected behavioral 0–100 trust score.
 
 If you operate AI agents, this pattern is a fast path to governed, auditable agent-to-agent workflows. PRs & feedback welcome!
