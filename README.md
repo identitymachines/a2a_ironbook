@@ -1,6 +1,6 @@
 # A2A x Iron Book — Least-Privilege Agent Task Handoff (Extension Demo)
 
-> Iron Book SDK target: `ironbook-sdk >= 0.3.1`.  
+> Iron Book SDK target: `ironbook-sdk >= 0.3.2`.  
 > Docs (Iron Book SDK): https://pypi.org/project/ironbook-sdk — Quick Start, methods, calls, data types.  
 > Iron Book comprehensive solution overview: https://docs.identitymachines.com.  
 > Docs (Extension): Iron Book A2A Extension page https://pypi.org/project/ironbook-a2a-extension.  

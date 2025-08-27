@@ -20,8 +20,6 @@ from ironbook_a2a import (
     IRONBOOK_EXTENSION_URI,
     IRONBOOK_AGENT_DID_FIELD,
     IRONBOOK_AUTH_TOKEN_FIELD,
-    IRONBOOK_ACTION_FIELD,
-    IRONBOOK_RESOURCE_FIELD,
     IRONBOOK_CONTEXT_FIELD,
 )
 
@@ -127,13 +125,11 @@ async def summarizer_entry(req: Request):
     # 3) Extract namespaced metadata
     md = a2a.params.metadata
 
-    action = md.get(IRONBOOK_ACTION_FIELD)
-    resource = md.get(IRONBOOK_RESOURCE_FIELD)
     context = md.get(IRONBOOK_CONTEXT_FIELD, {})
     triage_token = md.get(IRONBOOK_AUTH_TOKEN_FIELD)
     triage_did = md.get(IRONBOOK_AGENT_DID_FIELD)
 
-    if not all([action, resource, context, triage_token, triage_did]):
+    if not all([context, triage_token, triage_did]):
         raise HTTPException(status_code=400, detail="\n❌ Missing required Iron Book A2A extension metadata\n")
 
     print(f"\n🪙📝✅ Parsed A2A Triage agent request metadata for Summarizer\n")
@@ -149,8 +145,6 @@ async def summarizer_entry(req: Request):
         agent_did=triage_did,
         policy_id=policy_id,
         token=triage_token,
-        action=action,
-        resource=resource,
         context=ctx_requester
     ))
     if not triage_decision.allow:
@@ -163,6 +157,8 @@ async def summarizer_entry(req: Request):
     token_data = await client.get_auth_token(GetAuthTokenOptions(
         agent_did=summ.did,
         vc=summ.vc,
+        action="openai_infer",
+        resource="llm://responses",
         audience=IRONBOOK_AUDIENCE
     ))
     access_token = token_data.get("access_token")
@@ -178,8 +174,6 @@ async def summarizer_entry(req: Request):
         agent_did=summ.did,
         policy_id=policy_id,
         token=access_token,
-        action=action,
-        resource=resource,
         context=ctx_executor
     ))
     if not summ_decision.allow:

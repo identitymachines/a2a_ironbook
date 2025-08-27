@@ -4,9 +4,15 @@ default allow := false
 
 # Use https://play.openpolicyagent.org to validate syntax, or create all kinds of crazy, much more granular policies
 
-# Scope: LLM inference
-in_scope if {
-  input.action == "infer"
+# Scope: action delegation for this resource
+can_delegate if {
+  input.action == "delegate"
+  input.resource == "llm://responses"
+}
+
+# Scope: LLM inference for this resource
+can_infer if {
+  input.action == "openai_infer"
   input.resource == "llm://responses"
 }
 
@@ -16,7 +22,7 @@ allowed_regions := {"US", "EU"}
 
 # Requester (Triage): must have 'delegate'; trust >= 45
 allow if {
-  in_scope
+  can_delegate
   input.context.role == "requester"
   input.capabilities[_] == "delegate"
   input.trust >= 45
@@ -24,7 +30,7 @@ allow if {
 
 # Executor (Summarizer): must have 'openai_infer' and satisfy guardrails
 allow if {
-  in_scope
+  can_infer
   input.context.role == "executor"
   input.capabilities[_] == "openai_infer"
   input.trust >= 55

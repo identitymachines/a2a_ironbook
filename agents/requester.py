@@ -14,8 +14,6 @@ from ironbook_a2a import (
     IRONBOOK_EXTENSION_URI,
     IRONBOOK_AGENT_DID_FIELD,
     IRONBOOK_AUTH_TOKEN_FIELD,
-    IRONBOOK_ACTION_FIELD,
-    IRONBOOK_RESOURCE_FIELD,
     IRONBOOK_CONTEXT_FIELD
 )
 
@@ -33,8 +31,6 @@ SUMMARIZER_URL = os.getenv("SUMMARIZER_URL", "http://localhost:8001/agents/summa
 
 def build_metadata(triage_did: str, token: str):
     return {
-        IRONBOOK_ACTION_FIELD: "infer",
-        IRONBOOK_RESOURCE_FIELD: "llm://responses",
         IRONBOOK_CONTEXT_FIELD: {
             "purpose": "assistant",
             "data_classification": "internal",
@@ -70,6 +66,8 @@ async def main():
     token_data = await client.get_auth_token(GetAuthTokenOptions(
         agent_did=triage.did,
         vc=triage.vc,
+        action="delegate",
+        resource="llm://responses",
         audience=IRONBOOK_AUDIENCE
     ))
     access_token = token_data.get("access_token")
