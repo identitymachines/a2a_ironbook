@@ -51,6 +51,7 @@ def build_metadata(triage_did: str, token: str):
     }
 
 async def main():
+    print("\n📓 Initializing Iron Book client...\n")
     client = IronBookClient(api_key=IRONBOOK_API_KEY)
 
     # Register the Triage agent (this is the agent that will be used to delegate the task to the summarizer agent
@@ -60,9 +61,11 @@ async def main():
             agent_name=TRIAGE_AGENT_NAME,
             capabilities=TRIAGE_CAPABILITIES
         ))
+        print(f"\n🤖✅ Triage agent registered with DID: {triage.did}\n")
     except Exception:
         # Fall back to getting an existing agent with that name if registration fails
         triage = await client.get_agent(f"did:web:agents.identitymachines.com:{TRIAGE_AGENT_NAME}")
+        print(f"\n🤖✅ Triage agent found with DID: {triage.did}\n")
 
     token_data = await client.get_auth_token(GetAuthTokenOptions(
         agent_did=triage.did,
@@ -70,7 +73,9 @@ async def main():
         audience=IRONBOOK_AUDIENCE
     ))
     access_token = token_data.get("access_token")
-    assert access_token, "Failed to mint one-shot Iron Book token for the Triage agent"
+    assert access_token, "🪙❌ Failed to mint one-shot Iron Book token for the Triage agent"
+
+    print(f"\n🪙✅ One-shot Iron Book token minted for the Triage agent\n")
 
     body = {
         "jsonrpc": "2.0",
@@ -81,11 +86,12 @@ async def main():
             "metadata": build_metadata(triage.did, access_token)
         }
     }
+    print(f"\n🪙📝✅ Built task delegation request payload with Triage-minted one-shot token and policy context\n")
     headers = { "Content-Type": "application/json", "X-A2A-Extensions": IRONBOOK_EXTENSION_URI } # This is the header that tells the summarizer agent that the requester agent is using the Iron Book extension
 
     async with httpx.AsyncClient(timeout=30.0) as http:
         r = await http.post(SUMMARIZER_URL, headers=headers, content=json.dumps(body))
-        print("Status:", r.status_code, "Activated:", r.headers.get("X-A2A-Extensions"))
+        print("🤖 Summarizer agent request status:", r.status_code, " 🥳✅ Extension activated:", r.headers.get("X-A2A-Extensions"))
         try:
             print(json.dumps(r.json(), indent=2))
         except Exception:

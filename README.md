@@ -41,3 +41,8 @@ Both must **ALLOW** to proceed.
 - **API key issues**: Get your Iron Book API key at https://ironbook.identitymachines.com
 - **Agent Not Found**: Your agent's DID is be stripped of all non-alphanumeric characters (if you name your Iron Book agent "a2a-summarizer", your DID will be 'did:web:agents.identitymachines.com:a2asummarizer')
 - **Port conflicts**: Change `SUMMARIZER_PORT` in `.env`
+
+### Customization & Improvements
+- **Real LLM Inference**: Add real LLM inference and agents (e.g., using ADK)
+- **Customize Policy**: Add more Trust Score gates, prompt secrets detection, etc.
+- **Expand Use Cases**: Don't limit yourself to LLM calls - use MCP to gatekeep tool access, and more

@@ -57,6 +57,7 @@ AGENT_CARD = {
 BOOT: Dict[str, Any] = {}
 
 async def bootstrap() -> None:
+    print("\n📓 Initializing server-side Iron Book client...\n")
     client = IronBookClient(api_key=IRONBOOK_API_KEY)
 
     # Register the Summarizer agent (this is the agent that will performing the LLM inference action, delegated by the Triage agent)
@@ -66,9 +67,11 @@ async def bootstrap() -> None:
             agent_name=SUMM_AGENT_NAME,
             capabilities=SUMM_CAPABILITIES
         ))
+        print(f"\n🤖✅ Summarizer agent registered with DID: {agent.did}\n")
     except Exception:
         # Fall back to getting an existing agent with that name if registration fails
         agent = await client.get_agent(f"did:web:agents.identitymachines.com:{SUMM_AGENT_NAME}")
+        print(f"\n🤖✅ Summarizer agent found with DID: {agent.did}\n")
 
     with open(POLICY_PATH, "r", encoding="utf-8") as f:
         policy_content = f.read()
@@ -79,6 +82,7 @@ async def bootstrap() -> None:
         policy_content=policy_content,
         metadata={"name": "llm_guard_v1", "version": "1.0"}
     ))
+    print(f"\n📄✅ Policy uploaded/updated with ID: {policy["policyId"]}\n")
 
     BOOT["client"] = client
     BOOT["summ_agent"] = agent
@@ -93,6 +97,8 @@ class A2ARequest(BaseModel):
     id: str
     method: str
     params: A2AParams
+
+print(f"\n✨ Building A2A API infrastructure...\n")
 
 app = FastAPI()
 
@@ -128,7 +134,9 @@ async def summarizer_entry(req: Request):
     triage_did = md.get(IRONBOOK_AGENT_DID_FIELD)
 
     if not all([action, resource, context, triage_token, triage_did]):
-        raise HTTPException(status_code=400, detail="Missing required Iron Book A2A extension metadata")
+        raise HTTPException(status_code=400, detail="\n❌ Missing required Iron Book A2A extension metadata\n")
+
+    print(f"\n🪙📝✅ Parsed A2A Triage agent request metadata for Summarizer\n")
 
     client: IronBookClient = BOOT["client"]
     policy_id = BOOT["policy"]["policyId"]
@@ -146,9 +154,10 @@ async def summarizer_entry(req: Request):
         context=ctx_requester
     ))
     if not triage_decision.allow:
-        return _a2a_error(a2a.id, "Extension activation failed",
+        return _a2a_error(a2a.id, "\n🪙❌Extension activation failed",
                           {"reason": triage_decision.reason | "Requester not allowed to perform this action"})
 
+    print(f"\n🪙✅ Policy check passed with token: Requester agent allowed to delegate this action.\n")
     # 5) Decision #2 — Executor (Summarizer agent) allowed to execute? (role=executor)
     summ = BOOT["summ_agent"]
     token_data = await client.get_auth_token(GetAuthTokenOptions(
@@ -158,8 +167,9 @@ async def summarizer_entry(req: Request):
     ))
     access_token = token_data.get("access_token")
     if not access_token:
-        return _a2a_error(a2a.id, "Extension activation failed", {"reason": "Failed to mint one-shot Iron Book token for the Executor/Summarizer agent"})
+        return _a2a_error(a2a.id, "\n🪙❌ Extension activation failed", {"reason": "Failed to mint one-shot Iron Book token for the Executor/Summarizer agent"})
 
+    print(f"\n🪙✅ One-shot Iron Book token minted for the Summarizer agent\n")
     ctx_executor = dict(context)
     ctx_executor["role"] = "executor"
     ctx_executor["requester_agent_did"] = triage_did # Audit log will record full context, including the Triage agent's DID for reference
@@ -173,9 +183,12 @@ async def summarizer_entry(req: Request):
         context=ctx_executor
     ))
     if not summ_decision.allow:
-        return _a2a_error(a2a.id, "Denied by policy",
-                          {"reason": summ_decision.reason | "Executor not allowed to perform this action"})
+        return _a2a_error(a2a.id, "\n📄❌ Denied by policy",
+                          {"reason": summ_decision.reason | "Summarizer not allowed to perform this action"})
 
+    print(f"\n📄✅ Policy check passed with token: Summarizer agent allowed to perform this action.\n")
+    print(f"\n💬✅ Proceeding with LLM inference (mocked in this demo)...\n")
+    
     # 6) Demo result (no real LLM call)
     task = a2a.params.message.get("task", "summarize")
     input_ref = a2a.params.message.get("inputRef", "doc://unknown") # This is the sample input to the summarizer agent; NOT an actual document to summarize
