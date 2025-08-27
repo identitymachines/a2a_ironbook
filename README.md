@@ -37,10 +37,11 @@ Both must **ALLOW** to proceed.
 - **Data placement:** All extension data are placed under `params.metadata["<URI>/…"]` (namespaced keys). No core schema changes.
 
 ### Troubleshooting
-- **Module errors**: Use `python -m agents.summarizer` instead of `python agents/summarizer.py`
+- **Module errors**: Use `python -m agents.summarizer` instead of `python agents/summarizer.py`, and `python -m agents.requester` instead of `python agents/requester.py`
 - **API key issues**: Get your Iron Book API key at https://ironbook.identitymachines.com
 - **Agent Not Found**: Your agent's DID is be stripped of all non-alphanumeric characters (if you name your Iron Book agent "a2a-summarizer", your DID will be 'did:web:agents.identitymachines.com:a2asummarizer')
 - **Port conflicts**: Change `SUMMARIZER_PORT` in `.env`
+- **Terminals**: Remember, you need to run Summarizer (server-side; run this first) and Triage in separate terminal windows
 
 ### Customization & Improvements
 - **Real LLM Inference**: Add real LLM inference and agents (e.g., using ADK)
